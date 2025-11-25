@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Entry Form</title>
+    <title>Expense Tracker</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
             min-height: 100vh;
             padding: 20px;
             display: flex;
@@ -23,23 +23,38 @@
 
         .container {
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
             padding: 30px;
-            max-width: 500px;
+            max-width: 450px;
             width: 100%;
         }
 
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 24px;
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
         }
 
-        .subtitle {
-            color: #666;
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .header .icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .current-period {
+            background: #e8f5e9;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
             margin-bottom: 25px;
+            color: #2e7d32;
             font-size: 14px;
+            font-weight: 500;
         }
 
         .form-group {
@@ -50,23 +65,29 @@
             display: block;
             margin-bottom: 8px;
             color: #333;
-            font-weight: 500;
+            font-weight: 600;
             font-size: 14px;
         }
 
-        input, textarea, select {
+        input, textarea {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 15px;
-            transition: border-color 0.3s;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
             font-family: inherit;
         }
 
-        input:focus, textarea:focus, select:focus {
+        input:focus, textarea:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #11998e;
+            box-shadow: 0 0 0 3px rgba(17, 153, 142, 0.1);
+        }
+
+        input[type="number"] {
+            font-size: 20px;
+            font-weight: 600;
         }
 
         textarea {
@@ -75,21 +96,23 @@
         }
 
         button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
             color: white;
             border: none;
-            padding: 14px 30px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
+            padding: 16px 30px;
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: 700;
             cursor: pointer;
             width: 100%;
             transition: transform 0.2s, box-shadow 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 8px 25px rgba(17, 153, 142, 0.3);
         }
 
         button:active {
@@ -103,27 +126,40 @@
         }
 
         .message {
-            padding: 12px;
-            border-radius: 8px;
+            padding: 14px;
+            border-radius: 10px;
             margin-bottom: 20px;
             display: none;
             font-size: 14px;
+            font-weight: 500;
         }
 
         .message.success {
             background: #d4edda;
             color: #155724;
-            border: 1px solid #c3e6cb;
+            border: 2px solid #c3e6cb;
         }
 
         .message.error {
             background: #f8d7da;
             color: #721c24;
-            border: 1px solid #f5c6cb;
+            border: 2px solid #f5c6cb;
         }
 
         .message.show {
             display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .loading {
@@ -144,71 +180,123 @@
 
         .config-notice {
             background: #fff3cd;
-            border: 1px solid #ffc107;
+            border: 2px solid #ffc107;
             color: #856404;
             padding: 12px;
-            border-radius: 8px;
+            border-radius: 10px;
             margin-bottom: 20px;
             font-size: 13px;
+            font-weight: 500;
+        }
+
+        .currency-symbol {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .amount-wrapper {
+            position: relative;
+        }
+
+        .amount-wrapper input {
+            padding-left: 35px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📝 Data Entry Form</h1>
-        <p class="subtitle">Fill out the form below to add data to your Google Sheet</p>
+        <div class="header">
+            <div class="icon">💰</div>
+            <h1>Expense Tracker</h1>
+        </div>
+
+        <div class="current-period" id="currentPeriod">
+            Current Period: Loading...
+        </div>
 
         <div class="config-notice">
-            ⚠️ Remember to replace the SCRIPT_URL below with your Google Apps Script deployment URL
+            ⚠️ Replace SCRIPT_URL below with your Google Apps Script URL
         </div>
 
         <div id="message" class="message"></div>
 
-        <form id="dataForm">
+        <form id="expenseForm">
             <div class="form-group">
-                <label for="name">Name *</label>
-                <input type="text" id="name" name="name" required>
+                <label for="date">📅 Date</label>
+                <input type="date" id="date" name="date" required>
             </div>
 
             <div class="form-group">
-                <label for="email">Email *</label>
-                <input type="email" id="email" name="email" required>
+                <label for="note">📝 Note</label>
+                <textarea id="note" name="note" placeholder="What did you spend on?" required></textarea>
             </div>
 
             <div class="form-group">
-                <label for="phone">Phone Number</label>
-                <input type="tel" id="phone" name="phone">
-            </div>
-
-            <div class="form-group">
-                <label for="category">Category *</label>
-                <select id="category" name="category" required>
-                    <option value="">Select a category</option>
-                    <option value="Personal">Personal</option>
-                    <option value="Work">Work</option>
-                    <option value="Business">Business</option>
-                    <option value="Other">Other</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="notes">Notes</label>
-                <textarea id="notes" name="notes" placeholder="Add any additional information..."></textarea>
+                <label for="amount">💵 Amount</label>
+                <div class="amount-wrapper">
+                    <span class="currency-symbol">₹</span>
+                    <input type="number" id="amount" name="amount" step="0.01" min="0" placeholder="0.00" required>
+                </div>
             </div>
 
             <button type="submit" id="submitBtn">
-                Submit Data
+                Add Expense
             </button>
         </form>
     </div>
 
     <script>
         // REPLACE THIS WITH YOUR GOOGLE APPS SCRIPT WEB APP URL
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz15zLhwbIJQzoi2AmL-87Ta2fxClXuF3S8YIITIDG-p_qb6tmjP7l-GHTvSpW7QEvo/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz8p105XD_orraAbFpPIQxMvyQgB1hQ2eQPmT8aXpzZqJebTg87NgLFv68JWxiDlbUY/exec';
 
-        const form = document.getElementById('dataForm');
+        const form = document.getElementById('expenseForm');
+        const dateInput = document.getElementById('date');
         const message = document.getElementById('message');
         const submitBtn = document.getElementById('submitBtn');
+        const currentPeriodDiv = document.getElementById('currentPeriod');
+
+        // Set today's date as default
+        const today = new Date();
+        dateInput.valueAsDate = today;
+
+        // Calculate and display current period
+        function calculatePeriod(date) {
+            const day = date.getDate();
+            const month = date.getMonth();
+            const year = date.getFullYear();
+
+            let periodStart, periodEnd;
+
+            if (day >= 25) {
+                // From 25th of current month to 24th of next month
+                periodStart = new Date(year, month, 25);
+                periodEnd = new Date(year, month + 1, 24);
+            } else {
+                // From 25th of previous month to 24th of current month
+                periodStart = new Date(year, month - 1, 25);
+                periodEnd = new Date(year, month, 24);
+            }
+
+            return {
+                start: periodStart,
+                end: periodEnd,
+                sheetName: periodStart.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+            };
+        }
+
+        function updateCurrentPeriod() {
+            const period = calculatePeriod(new Date());
+            const startStr = period.start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            const endStr = period.end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            currentPeriodDiv.textContent = `Current Period: ${startStr} - ${endStr} (Sheet: ${period.sheetName})`;
+        }
+
+        updateCurrentPeriod();
 
         function showMessage(text, type) {
             message.textContent = text;
@@ -222,15 +310,19 @@
             e.preventDefault();
 
             if (SCRIPT_URL === 'YOUR_SCRIPT_URL_HERE') {
-                showMessage('Please configure the SCRIPT_URL in the code first!', 'error');
+                showMessage('⚠️ Please configure the SCRIPT_URL in the code first!', 'error');
                 return;
             }
 
             const formData = new FormData(form);
-            const data = Object.fromEntries(formData.entries());
+            const data = {
+                date: formData.get('date'),
+                note: formData.get('note'),
+                amount: parseFloat(formData.get('amount'))
+            };
 
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<span class="loading"></span> Submitting...';
+            submitBtn.innerHTML = '<span class="loading"></span> Adding...';
 
             try {
                 const response = await fetch(SCRIPT_URL, {
@@ -242,17 +334,25 @@
                     body: JSON.stringify(data)
                 });
 
-                // Note: With no-cors mode, we can't read the response
-                // We assume success if no error is thrown
-                showMessage('✓ Data submitted successfully!', 'success');
+                showMessage('✅ Expense added successfully!', 'success');
                 form.reset();
+                dateInput.valueAsDate = new Date();
+                document.getElementById('amount').focus();
 
             } catch (error) {
                 console.error('Error:', error);
-                showMessage('✗ Error submitting data. Please try again.', 'error');
+                showMessage('❌ Error adding expense. Please try again.', 'error');
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Submit Data';
+                submitBtn.textContent = 'Add Expense';
+            }
+        });
+
+        // Quick keyboard shortcut: Press Enter in amount field to submit
+        document.getElementById('amount').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                form.requestSubmit();
             }
         });
     </script>
